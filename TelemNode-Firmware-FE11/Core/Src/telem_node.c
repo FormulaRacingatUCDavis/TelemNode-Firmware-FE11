@@ -34,8 +34,11 @@ void TelemNode_Update()
 	}
 }
 
+void update_pwm()
+{
+	//TODO: implement fan curve
 
-
+}
 
 void get_temp_pres(cooling_data_t* cd)
 {
@@ -86,4 +89,16 @@ void set_adc_channel(ADC_HandleTypeDef* hadc, uint32_t channel)
 	{
 		Error_Handler();
 	}
+}
+
+void set_pump_speed(uint8_t percent_speed)
+{
+	uint32_t CCR = htim1.Init->Period * percentage / 100;
+	htim1.Instance->CCR1 = CCR;
+}
+
+void set_fan_speed(uint8_t percent_speed)
+{
+	uint32_t CCR = htim1.Init->Period * percentage / 100;
+	htim1.Instance->CCR2 = CCR;
 }
