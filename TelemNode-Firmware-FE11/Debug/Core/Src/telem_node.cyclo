@@ -1,5 +1,6 @@
-../Core/Src/telem_node.c:21:6:TelemNode_Init	1
-../Core/Src/telem_node.c:27:6:TelemNode_Update	2
-../Core/Src/telem_node.c:46:6:update_pwm	1
-../Core/Src/telem_node.c:51:9:get_pres	1
-../Core/Src/telem_node.c:62:9:get_temp	1
+../Core/Src/telem_node.c:24:6:TelemNode_Init	1
+../Core/Src/telem_node.c:30:6:TelemNode_Update	2
+../Core/Src/telem_node.c:55:19:can_send	1
+../Core/Src/telem_node.c:66:6:update_pwm	1
+../Core/Src/telem_node.c:71:9:get_pres	1
+../Core/Src/telem_node.c:82:9:get_temp	1

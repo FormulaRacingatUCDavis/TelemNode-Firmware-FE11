@@ -2,6 +2,8 @@
 #include "adc.h"
 
 #define VOLTAGE_DIVIDER_RATIO (12.0 / (12.0 + 6.04))
+#define HI8(x) ((x>>8)&0xFF)
+#define LO8(x) (x&0xFF);
 
 // HANDLE TYPE DEFS from main
 extern ADC_HandleTypeDef hadc1;
@@ -16,6 +18,7 @@ ADC_Input_t adc_outlet_temp = {};
 // PRIVATE FUNCTION PROTOTYPES
 int16_t get_pres(uint16_t adc_val);
 int16_t get_temp(uint16_t adc_val);
+HAL_StatusTypeDef can_send(uint32_t id, uint8_t* data, uint8_t len);
 
 
 void TelemNode_Init(){
@@ -26,14 +29,20 @@ void TelemNode_Init(){
 
 void TelemNode_Update()
 {
+	uint8_t tx_data[8];
+
 	ADC_Measure(&adc_inlet_temp, 1000);
 	ADC_Measure(&adc_outlet_temp, 1000);
 
 	int16_t inlet_temp = get_temp(adc_inlet_temp.value);
 	int16_t outlet_temp = get_temp(adc_outlet_temp.value);
 
-	//can_send_cooling_data(&cooling_data);
-	//update_pwm();
+	tx_data[0] = HI8(inlet_temp);
+	tx_data[1] = LO8(inlet_temp);
+	tx_data[2] = HI8(outlet_temp);
+	tx_data[3] = HI8(outlet_temp);
+
+	can_send(0x400, tx_data, 8);
 
 	for(int i = 0; i < WHEEL_SPEED_LOOPS; i++)
 	{
@@ -41,6 +50,17 @@ void TelemNode_Update()
 		//can_send_wheel_speed();
 		HAL_Delay(LOOP_PERIOD_MS);
 	}
+}
+
+HAL_StatusTypeDef can_send(uint32_t id, uint8_t* data, uint8_t len)
+{
+	CAN_TxHeaderTypeDef msg_hdr;
+	msg_hdr.IDE = CAN_ID_STD;
+	msg_hdr.StdId = id;
+	msg_hdr.RTR = CAN_RTR_DATA;
+	msg_hdr.DLC = len;
+
+	return HAL_CAN_AddTxMessage(&hcan, &msg_hdr, data, 0);
 }
 
 void update_pwm()
@@ -69,31 +89,4 @@ int16_t get_temp(uint16_t adc_val)
 	float temp = (v - 0.5) * 125.0 / 4.0;
 	return (int16_t)(temp * 10);
 }
-
-//uint32_t get_adc_single_conversion(ADC_HandleTypeDef* hadc, uint32_t channel)
-//{
-//	set_adc_channel(hadc, channel);
-//
-//	if(HAL_ADC_Start(hadc) != HAL_OK){
-//		Error_Handler();
-//	}
-//
-//	if(HAL_ADC_PollForConversion(hadc, 100) != HAL_OK){
-//		Error_Handler();
-//	}
-//
-//	return HAL_ADC_GetValue(hadc);
-//}
-//
-//void set_adc_channel(ADC_HandleTypeDef* hadc, uint32_t channel)
-//{
-//	ADC_ChannelConfTypeDef sConfig = {0};
-//	sConfig.Channel = ADC_CHANNEL_0;
-//	sConfig.Rank = ADC_REGULAR_RANK_1;
-//	sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-//	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-//	{
-//		Error_Handler();
-//	}
-//}
 
