@@ -14,7 +14,6 @@ ADC_Input_t adc_inlet_temp = {};
 ADC_Input_t adc_outlet_temp = {};
 
 // PRIVATE FUNCTION PROTOTYPES
-void get_cooling_data(cooling_data_t* cd);
 int16_t get_pres(uint16_t adc_val);
 int16_t get_temp(uint16_t adc_val);
 
@@ -47,15 +46,9 @@ void TelemNode_Update()
 void update_pwm()
 {
 	//TODO: implement fan curve
-
-<<<<<<< Updated upstream
 }
 
-void get_temp_pres(cooling_data_t* cd)
-=======
-
 int16_t get_pres(uint16_t adc_val)
->>>>>>> Stashed changes
 {
 	// TDH60W temp/pressure sensors have a FUCKING TRASH datasheet that doesn't list output curves
 	// 25psi sensors?
@@ -77,54 +70,6 @@ int16_t get_temp(uint16_t adc_val)
 	return (int16_t)(temp * 10);
 }
 
-<<<<<<< Updated upstream
-int16_t get_temp(ADC_HandleTypeDef* hadc, uint32_t channel)
-{
-	float adc_val = (float)get_adc_single_conversion(hadc, channel);
-	float mv = adc_val * 5000.0/4095.0;
-	//TODO: convert to temperature
-	return (int16_t)mv;
-}
-
-uint32_t get_adc_single_conversion(ADC_HandleTypeDef* hadc, uint32_t channel)
-{
-	set_adc_channel(hadc, channel);
-
-	if(HAL_ADC_Start(hadc) != HAL_OK){
-		Error_Handler();
-	}
-
-	if(HAL_ADC_PollForConversion(hadc, 100) != HAL_OK){
-		Error_Handler();
-	}
-
-	return HAL_ADC_GetValue(hadc);
-}
-
-void set_adc_channel(ADC_HandleTypeDef* hadc, uint32_t channel)
-{
-	ADC_ChannelConfTypeDef sConfig = {0};
-	sConfig.Channel = ADC_CHANNEL_0;
-	sConfig.Rank = ADC_REGULAR_RANK_1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-	{
-		Error_Handler();
-	}
-}
-
-void set_pump_speed(uint8_t percent_speed)
-{
-	uint32_t CCR = htim1.Init->Period * percentage / 100;
-	htim1.Instance->CCR1 = CCR;
-}
-
-void set_fan_speed(uint8_t percent_speed)
-{
-	uint32_t CCR = htim1.Init->Period * percentage / 100;
-	htim1.Instance->CCR2 = CCR;
-}
-=======
 //uint32_t get_adc_single_conversion(ADC_HandleTypeDef* hadc, uint32_t channel)
 //{
 //	set_adc_channel(hadc, channel);
@@ -151,4 +96,4 @@ void set_fan_speed(uint8_t percent_speed)
 //		Error_Handler();
 //	}
 //}
->>>>>>> Stashed changes
+

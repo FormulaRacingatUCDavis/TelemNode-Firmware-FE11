@@ -5,4 +5,9 @@
 #include "main.h"
 #include "config.h"
 
+
+// PUBLIC FUNCTION PROTOTYPES
+void TelemNode_Init();
+void TelemNode_Update();
+
 #endif
