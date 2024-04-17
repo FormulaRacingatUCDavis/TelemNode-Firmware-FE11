@@ -12,8 +12,9 @@ extern TIM_HandleTypeDef htim1;
 
 
 // PRIVATE GLOBALS
-ADC_Input_t adc_inlet_temp = {};
-ADC_Input_t adc_outlet_temp = {};
+ADC_Input_t adc_inlet_temp;
+ADC_Input_t adc_outlet_temp;
+uint32_t TxMailbox2;
 
 // PRIVATE FUNCTION PROTOTYPES
 int16_t get_pres(uint16_t adc_val);
@@ -22,9 +23,23 @@ HAL_StatusTypeDef can_send(uint32_t id, uint8_t* data, uint8_t len);
 
 
 void TelemNode_Init(){
+    ADC_ChannelConfTypeDef sConfig = {0};
+    sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+	sConfig.Rank = 1;
+
+	sConfig.Channel = ADC_CHANNEL_0;
+	adc_inlet_temp.h_adc = &hadc1;
+	adc_inlet_temp.sConfig = &sConfig,
+	adc_inlet_temp.value = 0;
+
+	sConfig.Channel = ADC_CHANNEL_1;
+	adc_outlet_temp.h_adc = &hadc1,
+	adc_outlet_temp.sConfig = &sConfig,
+	adc_outlet_temp.value = 0;
+
 	HAL_CAN_Start(&hcan);
-	ADC_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_0, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_1CYCLE_5);
-	ADC_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_1CYCLE_5);
+	ADC_Input_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_0, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_1CYCLE_5);
+	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_1CYCLE_5);
 }
 
 void TelemNode_Update()
@@ -40,7 +55,11 @@ void TelemNode_Update()
 	tx_data[0] = HI8(inlet_temp);
 	tx_data[1] = LO8(inlet_temp);
 	tx_data[2] = HI8(outlet_temp);
-	tx_data[3] = HI8(outlet_temp);
+	tx_data[3] = LO8(outlet_temp);
+	tx_data[4] = 0;
+	tx_data[5] = 0;
+	tx_data[6] = 0;
+	tx_data[7] = 0;
 
 	can_send(0x400, tx_data, 8);
 
@@ -60,7 +79,7 @@ HAL_StatusTypeDef can_send(uint32_t id, uint8_t* data, uint8_t len)
 	msg_hdr.RTR = CAN_RTR_DATA;
 	msg_hdr.DLC = len;
 
-	return HAL_CAN_AddTxMessage(&hcan, &msg_hdr, data, 0);
+	return HAL_CAN_AddTxMessage(&hcan, &msg_hdr, data, &TxMailbox2);
 }
 
 void update_pwm()

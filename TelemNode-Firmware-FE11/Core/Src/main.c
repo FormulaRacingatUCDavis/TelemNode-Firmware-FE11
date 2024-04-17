@@ -64,6 +64,13 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+CAN_TxHeaderTypeDef   TxHeader;
+uint32_t              TxMailbox;
+uint8_t TxData[] = {1,2,3,4,5,6,7,8};
+
+CAN_TxHeaderTypeDef   TxHeader2;
+uint32_t              TxMailbox2;
+uint8_t TxData2[] = {0,0,0,0,0,0,0,0};
 
 /* USER CODE END 0 */
 
@@ -102,6 +109,11 @@ int main(void)
 
   TelemNode_Init();
 
+  TxHeader.IDE = CAN_ID_STD;
+	TxHeader.StdId = 0x666;
+	TxHeader.RTR = CAN_RTR_DATA;
+	TxHeader.DLC = 8;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,6 +121,10 @@ int main(void)
   while (1)
   {
 	  TelemNode_Update();
+
+
+	  HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -174,7 +190,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 0 */
 
-  ADC_ChannelConfTypeDef sConfig = {0};
+//  ADC_ChannelConfTypeDef sConfig = {0};
 
   /* USER CODE BEGIN ADC1_Init 1 */
 
@@ -196,13 +212,13 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_0;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
+//  sConfig.Channel = ADC_CHANNEL_0;
+//  sConfig.Rank = ADC_REGULAR_RANK_1;
+//  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+//  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */

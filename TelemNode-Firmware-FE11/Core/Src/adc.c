@@ -7,7 +7,7 @@
 
 #include "adc.h"
 
-void ADC_Init(ADC_Input_t* adc, ADC_HandleTypeDef* h_adc, uint32_t channel, uint32_t rank, uint32_t sample_time)
+void ADC_Input_Init(ADC_Input_t* adc, ADC_HandleTypeDef* h_adc, uint32_t channel, uint32_t rank, uint32_t sample_time)
 {
 	adc->h_adc = h_adc;
 	adc->sConfig->Channel = channel;

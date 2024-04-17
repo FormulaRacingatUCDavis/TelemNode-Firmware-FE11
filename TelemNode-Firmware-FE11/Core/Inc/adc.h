@@ -18,7 +18,7 @@ typedef struct
 	uint16_t value;
 } ADC_Input_t;
 
-void ADC_Init(ADC_Input_t* adc, ADC_HandleTypeDef* h_adc, uint32_t channel, uint32_t rank, uint32_t sample_time);
+void ADC_Input_Init(ADC_Input_t* adc, ADC_HandleTypeDef* h_adc, uint32_t channel, uint32_t rank, uint32_t sample_time);
 HAL_StatusTypeDef ADC_Measure(ADC_Input_t* adc, uint32_t timeout);
 
 #endif /* INC_ADC_H_ */

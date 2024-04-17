@@ -60,8 +60,8 @@ all: main-build
 main-build: TelemNode-Firmware-FE11.elf secondary-outputs
 
 # Tool invocations
-TelemNode-Firmware-FE11.elf TelemNode-Firmware-FE11.map: $(OBJS) $(USER_OBJS) D:\Users\leoja\Documents\GitHub\TelemNode-Firmware-FE11\TelemNode-Firmware-FE11\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "TelemNode-Firmware-FE11.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"D:\Users\leoja\Documents\GitHub\TelemNode-Firmware-FE11\TelemNode-Firmware-FE11\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TelemNode-Firmware-FE11.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+TelemNode-Firmware-FE11.elf TelemNode-Firmware-FE11.map: $(OBJS) $(USER_OBJS) C:\Users\Melody\Desktop\Programming_Stuff\FRUCD\TelemNode-Firmware-FE11\TelemNode-Firmware-FE11\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "TelemNode-Firmware-FE11.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Melody\Desktop\Programming_Stuff\FRUCD\TelemNode-Firmware-FE11\TelemNode-Firmware-FE11\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TelemNode-Firmware-FE11.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
