@@ -1,5 +1,6 @@
-Core/Src/telem_node.o: ../Core/Src/telem_node.c ../Core/Inc/telem_node.h \
- ../Core/Inc/main.h ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
+Core/Src/can_manager.o: ../Core/Src/can_manager.c \
+ ../Core/Inc/can_manager.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h \
@@ -26,10 +27,8 @@ Core/Src/telem_node.o: ../Core/Src/telem_node.c ../Core/Inc/telem_node.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Core/Inc/config.h ../Core/Inc/adc.h ../Core/Inc/pwm.h \
- ../Core/Inc/can_manager.h ../Core/Inc/main.h
-../Core/Inc/telem_node.h:
-../Core/Inc/main.h:
+ ../Core/Inc/main.h
+../Core/Inc/can_manager.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h:
@@ -57,8 +56,4 @@ Core/Src/telem_node.o: ../Core/Src/telem_node.c ../Core/Inc/telem_node.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
-../Core/Inc/config.h:
-../Core/Inc/adc.h:
-../Core/Inc/pwm.h:
-../Core/Inc/can_manager.h:
 ../Core/Inc/main.h:

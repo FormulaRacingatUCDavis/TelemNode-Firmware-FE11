@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define TEMP_INLET_GPIO_Port GPIOA
 #define TEMP_OUTLET_Pin GPIO_PIN_1
 #define TEMP_OUTLET_GPIO_Port GPIOA
+#define BUZZER_Pin GPIO_PIN_12
+#define BUZZER_GPIO_Port GPIOB
 #define PWM_FAN_Pin GPIO_PIN_13
 #define PWM_FAN_GPIO_Port GPIOB
 #define PWM_PUMP_Pin GPIO_PIN_14

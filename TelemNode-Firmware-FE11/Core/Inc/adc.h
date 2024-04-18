@@ -14,7 +14,7 @@
 typedef struct
 {
 	ADC_HandleTypeDef* h_adc;
-	ADC_ChannelConfTypeDef* sConfig;
+	ADC_ChannelConfTypeDef sConfig;
 	uint16_t value;
 } ADC_Input_t;
 

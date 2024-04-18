@@ -1,5 +1,7 @@
 "./Core/Src/adc.o"
+"./Core/Src/can_manager.o"
 "./Core/Src/main.o"
+"./Core/Src/pwm.o"
 "./Core/Src/stm32f1xx_hal_msp.o"
 "./Core/Src/stm32f1xx_it.o"
 "./Core/Src/syscalls.o"

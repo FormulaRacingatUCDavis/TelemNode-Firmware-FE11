@@ -1,6 +1,8 @@
-../Core/Src/telem_node.c:25:6:TelemNode_Init	32	static
-../Core/Src/telem_node.c:45:6:TelemNode_Update	24	static
-../Core/Src/telem_node.c:74:19:can_send	48	static
-../Core/Src/telem_node.c:85:6:update_pwm	4	static
-../Core/Src/telem_node.c:90:9:get_pres	24	static
-../Core/Src/telem_node.c:101:9:get_temp	24	static
+../Core/Src/telem_node.c:34:6:TelemNode_Init	16	static
+../Core/Src/telem_node.c:61:6:TelemNode_Update	16	static
+../Core/Src/telem_node.c:95:6:update_pwm	4	static
+../Core/Src/telem_node.c:100:9:get_pres	24	static
+../Core/Src/telem_node.c:111:9:get_temp	24	static
+../Core/Src/telem_node.c:122:6:set_pump_speed	16	static
+../Core/Src/telem_node.c:127:6:set_fan_speed	16	static
+../Core/Src/telem_node.c:132:6:buzzerer	16	static
