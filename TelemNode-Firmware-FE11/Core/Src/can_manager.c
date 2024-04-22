@@ -12,7 +12,7 @@ extern CAN_HandleTypeDef hcan;
 
 CAN_DATA_t can_data;
 
-HAL_StatusTypeDef CAN_Init()
+void CAN_Init()
 {
 	// Filter vehicle state messages into FIFO0
 	CAN_FilterTypeDef can_filter;
@@ -29,8 +29,12 @@ HAL_StatusTypeDef CAN_Init()
 	if (HAL_CAN_ConfigFilter(&hcan, &can_filter) != HAL_OK) {
 	  Error_Handler();
 	}
-
-	return HAL_CAN_Start(&hcan);
+	if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK) {
+		Error_Handler();
+	}
+	if ( HAL_CAN_Start(&hcan) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 HAL_StatusTypeDef CAN_Send(uint32_t id, uint8_t* data, uint8_t len)

@@ -42,7 +42,7 @@ typedef struct {
 	uint8_t bms_temp;
 } CAN_DATA_t;
 
-HAL_StatusTypeDef CAN_Init();
+void CAN_Init();
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan_ptr);
 HAL_StatusTypeDef CAN_Send(uint32_t id, uint8_t* data, uint8_t len);
 
