@@ -21,6 +21,9 @@ typedef enum {
     MC_VOLTAGE_INFO = 0x0A7,
     MC_INTERNAL_STATES = 0xAA,
     MC_FAULT_CODES = 0xAB,
+	MC_TEMPS_1 = 0xA0,
+	MC_TEMPS_2 = 0xA1,
+	MC_TEMPS_3 = 0xA2,
     // TCAN
     FRONT_LEFT_WHEEL_SPEED = 0x470,
     FRONT_RIGHT_WHEEL_SPEED = 0x471,
@@ -40,6 +43,12 @@ typedef enum {
 typedef struct {
 	VCU_STATE_t vcu_state;
 	uint8_t bms_temp;
+	int16_t mc_temp_module_a;
+	int16_t mc_temp_module_b;
+	int16_t mc_temp_module_c;
+	int16_t mc_temp_max;
+	int16_t motor_temp;
+	uint8_t inverter_enable;
 } CAN_DATA_t;
 
 void CAN_Init();

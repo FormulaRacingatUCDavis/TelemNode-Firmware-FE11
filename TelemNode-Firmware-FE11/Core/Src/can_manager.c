@@ -55,7 +55,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan_ptr)
 	CAN_RxHeaderTypeDef can_rx_header;
 	uint8_t can_rx_data[8];
 
-	if (HAL_CAN_GetRxMessage(hcan_ptr, CAN_RX_FIFO0, &can_rx_header, can_rx_data) != HAL_OK) {
+ 	if (HAL_CAN_GetRxMessage(hcan_ptr, CAN_RX_FIFO0, &can_rx_header, can_rx_data) != HAL_OK) {
 		Error_Handler();
 	}
 
@@ -67,5 +67,31 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan_ptr)
 		case BMS_STATUS_MSG:
 			can_data.bms_temp = can_rx_data[0];
 			break;
+		case MC_TEMPS_1:
+			can_data.mc_temp_module_a = (can_rx_data[1] << 8);
+			can_data.mc_temp_module_a |= can_rx_data[0];
+
+			can_data.mc_temp_module_c = (can_rx_data[3] << 8);
+			can_data.mc_temp_module_c |= can_rx_data[2];
+
+			can_data.mc_temp_module_c = (can_rx_data[5] << 8);
+			can_data.mc_temp_module_c |= can_rx_data[4];
+
+			can_data.mc_temp_max = can_data.mc_temp_module_a;
+			if(can_data.mc_temp_module_b > can_data.mc_temp_max){
+				can_data.mc_temp_max = can_data.mc_temp_module_b;
+			}
+			if(can_data.mc_temp_module_c > can_data.mc_temp_max){
+				can_data.mc_temp_max = can_data.mc_temp_module_c;
+			}
+			break;
+		case MC_TEMPS_3:
+			can_data.motor_temp = (can_rx_data[5] << 8);
+			can_data.motor_temp |= can_rx_data[4];
+			break;
+		case TORQUE_REQUEST:
+			can_data.inverter_enable = can_rx_data[5] & 0x01;
+			break;
+
 	}
 }

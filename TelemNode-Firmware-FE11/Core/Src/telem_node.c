@@ -3,6 +3,7 @@
 #include "pwm.h"
 #include "can_manager.h"
 #include "main.h"
+#include "wheel_speed.h"
 
 #define VOLTAGE_DIVIDER_RATIO (12.0 / (12.0 + 6.04))
 #define HI8(x) ((x>>8)&0xFF)
@@ -20,9 +21,9 @@ ADC_Input_t adc_inlet_temp;
 ADC_Input_t adc_outlet_temp;
 PWM_Output_t pwm_fan;
 PWM_Output_t pwm_pump;
+WheelSpeed_t wheel_rr;
+WheelSpeed_t wheel_rl;
 
-uint8_t bms_temp;
-uint8_t vcu_state;
 
 // PRIVATE FUNCTION PROTOTYPES
 int16_t get_pres(uint16_t adc_val);
@@ -32,19 +33,6 @@ void set_pump_speed(uint8_t speed);
 void buzzerer();
 
 void TelemNode_Init(){
-    //ADC_ChannelConfTypeDef sConfig = {0};
-    //sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-	//sConfig.Rank = 1;
-
-	//sConfig.Channel = ADC_CHANNEL_0;
-	//adc_inlet_temp.h_adc = &hadc1;
-	//adc_inlet_temp.sConfig = &sConfig,
-	//adc_inlet_temp.value = 0;
-
-	//sConfig.Channel = ADC_CHANNEL_1;
-	//adc_outlet_temp.h_adc = &hadc1,
-	//adc_outlet_temp.sConfig = &sConfig,
-	//adc_outlet_temp.value = 0;
 
 	CAN_Init();
 
@@ -53,6 +41,9 @@ void TelemNode_Init(){
 
 	PWM_Init(&pwm_fan, &htim1, TIM_CHANNEL_1);
 	PWM_Init(&pwm_pump, &htim1, TIM_CHANNEL_2);
+
+	WheelSpeed_Init(&wheel_rr);
+	WheelSpeed_Init(&wheel_rl);
 
 	set_pump_speed(255);
 	set_fan_speed(0);
@@ -84,17 +75,44 @@ void TelemNode_Update()
 
 	for(int i = 0; i < WHEEL_SPEED_LOOPS; i++)
 	{
-		//get_wheel_speed();
-		//can_send_wheel_speed()
+		// casting to uint16_t, should never overflow
+		uint16_t cps_rr = (uint16_t)WheelSpeed_GetCPS(&wheel_rr);
+		uint16_t cps_rl = (uint16_t)WheelSpeed_GetCPS(&wheel_rl);
+
+		tx_data[0] = HI8(cps_rr);
+		tx_data[1] = LO8(cps_rr);
+		tx_data[2] = HI8(cps_rl);
+		tx_data[3] = LO8(cps_rl);
+
+		if(CAN_Send(0x401, tx_data, 4) != HAL_OK)
+		{
+			Error_Handler();
+		}
 
 		buzzerer();
 		HAL_Delay(LOOP_PERIOD_MS);
 	}
 }
 
-void update_pwm()
+void update_pwm(int16_t inlet_temp)
 {
-	//TODO: implement fan curve
+	//TODO: update these values to consider ambient air temp, vehicle speed, etc?
+	if(can_data.inverter_enable || (can_data.mc_temp_max > 400) || (can_data.motor_temp > 400)){
+		set_pump_speed(255);
+	} else {
+		set_pump_speed(0);
+	}
+
+	if(inlet_temp > 600){
+		set_fan_speed(255);
+	} else if(inlet_temp > 500){
+		set_fan_speed(180);
+	} else if(inlet_temp > 400){
+		set_fan_speed(100);
+	} else {
+		set_fan_speed(0);
+	}
+
 }
 
 int16_t get_pres(uint16_t adc_val)
@@ -150,6 +168,17 @@ void buzzerer()
 	}
 
 	last_vcu_state = can_data.vcu_state;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+	switch(GPIO_Pin){
+		case GPIO_PIN_15:
+			wheel_rr.count++;
+			break;
+		case GPIO_PIN_8:
+			wheel_rl.count++;
+			break;
+	}
 }
 
 
