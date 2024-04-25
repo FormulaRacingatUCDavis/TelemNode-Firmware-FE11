@@ -8,7 +8,7 @@
 #define VOLTAGE_DIVIDER_RATIO (12.0 / (12.0 + 6.04))
 #define HI8(x) ((x>>8)&0xFF)
 #define LO8(x) (x&0xFF);
-#define BUZZ_TIME_MS 2000
+#define BUZZ_TIME_MS 1500
 
 // HANDLE TYPE DEFS from main
 extern ADC_HandleTypeDef hadc1;
@@ -30,14 +30,15 @@ int16_t get_pres(uint16_t adc_val);
 int16_t get_temp(uint16_t adc_val);
 void set_fan_speed(uint8_t speed);
 void set_pump_speed(uint8_t speed);
+void update_pwm(int16_t inlet_temp);
 void buzzerer();
 
 void TelemNode_Init(){
 
 	CAN_Init();
 
-	ADC_Input_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_0, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_1CYCLE_5);
-	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_1CYCLE_5);
+	ADC_Input_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_4, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_5, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 
 	PWM_Init(&pwm_fan, &htim1, TIM_CHANNEL_1);
 	PWM_Init(&pwm_pump, &htim1, TIM_CHANNEL_2);
@@ -90,6 +91,7 @@ void TelemNode_Update()
 		}
 
 		buzzerer();
+		update_pwm(inlet_temp);
 		HAL_Delay(LOOP_PERIOD_MS);
 	}
 }
@@ -133,8 +135,10 @@ int16_t get_temp(uint16_t adc_val)
 	// assuming temperature range is 0C-125C mapped to 0.5V-4.5V
 
 	float v = (float)adc_val * (3.3/4095.0) / VOLTAGE_DIVIDER_RATIO;
-	float temp = (v - 0.5) * 125.0 / 4.0;
-	return (int16_t)(temp * 10);
+	//v = v - 0.040; // ground reference is 40mV
+	return (int16_t)(1000*v);
+	//float temp = ((v - 0.5) * (120 + 40) / 4.0) - 40;
+	//return (int16_t)(temp * 10);
 }
 
 void set_pump_speed(uint8_t speed)
