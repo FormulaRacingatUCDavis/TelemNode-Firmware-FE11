@@ -135,10 +135,10 @@ int16_t get_temp(uint16_t adc_val)
 	// assuming temperature range is 0C-125C mapped to 0.5V-4.5V
 
 	float v = (float)adc_val * (3.3/4095.0) / VOLTAGE_DIVIDER_RATIO;
-	//v = v - 0.040; // ground reference is 40mV
-	return (int16_t)(1000*v);
+	//v = v - 0.040; // ground reference is 40m
 	//float temp = ((v - 0.5) * (120 + 40) / 4.0) - 40;
-	//return (int16_t)(temp * 10);
+	float temp = (46.7558 * v) - 65.9775; // values from calibration run
+	return (int16_t)(temp * 10);
 }
 
 void set_pump_speed(uint8_t speed)
