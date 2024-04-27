@@ -19,6 +19,8 @@ extern CAN_DATA_t can_data;
 // PRIVATE GLOBALS
 ADC_Input_t adc_inlet_temp;
 ADC_Input_t adc_outlet_temp;
+ADC_Input_t adc_temp1;
+ADC_Input_t adc_temp3;
 PWM_Output_t pwm_fan;
 PWM_Output_t pwm_pump;
 WheelSpeed_t wheel_rr;
@@ -40,6 +42,9 @@ void TelemNode_Init(){
 	ADC_Input_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_4, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_5, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 
+	ADC_Input_Init(&adc_temp1, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_temp3, &hadc1, ADC_CHANNEL_3, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+
 	PWM_Init(&pwm_fan, &htim1, TIM_CHANNEL_1);
 	PWM_Init(&pwm_pump, &htim1, TIM_CHANNEL_2);
 
@@ -57,17 +62,23 @@ void TelemNode_Update()
 	ADC_Measure(&adc_inlet_temp, 1000);
 	ADC_Measure(&adc_outlet_temp, 1000);
 
+	ADC_Measure(&adc_temp1, 1000);
+	ADC_Measure(&adc_temp3, 1000);
+
 	int16_t inlet_temp = get_temp(adc_inlet_temp.value);
 	int16_t outlet_temp = get_temp(adc_outlet_temp.value);
+
+	uint16_t temp1_raw = adc_temp1.value;
+	uint16_t temp3_raw = adc_temp3.value;
 
 	tx_data[0] = HI8(inlet_temp);
 	tx_data[1] = LO8(inlet_temp);
 	tx_data[2] = HI8(outlet_temp);
 	tx_data[3] = LO8(outlet_temp);
-	tx_data[4] = 0;
-	tx_data[5] = 0;
-	tx_data[6] = 0;
-	tx_data[7] = 0;
+	tx_data[4] = HI8(temp1_raw);
+	tx_data[5] = LO8(temp1_raw);
+	tx_data[6] = HI8(temp3_raw);
+	tx_data[7] = LO8(temp3_raw);
 
 	if(CAN_Send(0x400, tx_data, 8) != HAL_OK)
 	{
@@ -137,9 +148,10 @@ int16_t get_temp(uint16_t adc_val)
 	float v = (float)adc_val * (3.3/4095.0) / VOLTAGE_DIVIDER_RATIO;
 	//v = v - 0.040; // ground reference is 40m
 	//float temp = ((v - 0.5) * (120 + 40) / 4.0) - 40;
-	float temp = (46.7558 * v) - 65.9775; // values from calibration run
+	float temp = ((46.7558 * v) - 63.4775)/1.11248; // values from calibration run
 	return (int16_t)(temp * 10);
 }
+
 
 void set_pump_speed(uint8_t speed)
 {

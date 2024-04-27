@@ -61,8 +61,10 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define TEMP_INLET_Pin GPIO_PIN_0
 #define TEMP_INLET_GPIO_Port GPIOA
-#define TEMP_OUTLET_Pin GPIO_PIN_1
-#define TEMP_OUTLET_GPIO_Port GPIOA
+#define TEMP1_Pin GPIO_PIN_1
+#define TEMP1_GPIO_Port GPIOA
+#define TEMP3_Pin GPIO_PIN_3
+#define TEMP3_GPIO_Port GPIOA
 #define BUZZER_Pin GPIO_PIN_12
 #define BUZZER_GPIO_Port GPIOB
 #define PWM_FAN_Pin GPIO_PIN_13
