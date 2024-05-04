@@ -1,0 +1,10 @@
+12:54:47 **** Incremental Build of configuration Debug for project TelemNode-Firmware-FE11 ****
+make -j11 all 
+arm-none-eabi-size  TelemNode-Firmware-FE11.elf 
+   text	   data	    bss	    dec	    hex	filename
+  20804	     20	   1908	  22732	   58cc	TelemNode-Firmware-FE11.elf
+Finished building: default.size.stdout
+ 
+
+12:54:47 Build Finished. 0 errors, 0 warnings. (took 165ms)
+

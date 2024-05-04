@@ -30,6 +30,7 @@ WheelSpeed_t wheel_rl;
 // PRIVATE FUNCTION PROTOTYPES
 int16_t get_pres(uint16_t adc_val);
 int16_t get_temp(uint16_t adc_val);
+int16_t get_air_temp(uint16_t adc_val);
 void set_fan_speed(uint8_t speed);
 void set_pump_speed(uint8_t speed);
 void update_pwm(int16_t inlet_temp);
@@ -68,8 +69,8 @@ void TelemNode_Update()
 	int16_t inlet_temp = get_temp(adc_inlet_temp.value);
 	int16_t outlet_temp = get_temp(adc_outlet_temp.value);
 
-	uint16_t temp1_raw = adc_temp1.value;
-	uint16_t temp3_raw = adc_temp3.value;
+	uint16_t temp1_raw = get_air_temp(adc_temp1.value);
+	uint16_t temp3_raw = get_air_temp(adc_temp3.value);
 
 	tx_data[0] = HI8(inlet_temp);
 	tx_data[1] = LO8(inlet_temp);
@@ -150,6 +151,12 @@ int16_t get_temp(uint16_t adc_val)
 	//float temp = ((v - 0.5) * (120 + 40) / 4.0) - 40;
 	float temp = ((46.7558 * v) - 63.4775)/1.11248; // values from calibration run
 	return (int16_t)(temp * 10);
+}
+
+int16_t get_air_temp(uint16_t adc_val)
+{
+	float temp = 83.35412 - 0.03634221 * adc_val +0.0000034466 * adc_val * adc_val;
+	return (int16_t) (temp *10);
 }
 
 
