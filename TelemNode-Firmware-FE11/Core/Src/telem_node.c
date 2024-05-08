@@ -10,6 +10,12 @@
 #define LO8(x) (x&0xFF);
 #define BUZZ_TIME_MS 1500
 
+#define PUMP_THRESH 400
+#define FAN_THRESH_1 400
+#define FAN_THRESH_2 500
+#define FAN_THRESH_3 600
+#define HYSTERESIS 30
+
 // HANDLE TYPE DEFS from main
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim1;
@@ -110,20 +116,40 @@ void TelemNode_Update()
 
 void update_pwm(int16_t inlet_temp)
 {
+	// threshold variables to add hysteresis
+	static int fan_t1 = FAN_THRESH_1 + HYSTERESIS;
+	static int fan_t2 = FAN_THRESH_2 + HYSTERESIS;
+	static int fan_t3 = FAN_THRESH_2 + HYSTERESIS;
+	static int pump_t = PUMP_THRESH + HYSTERESIS;
+
 	//TODO: update these values to consider ambient air temp, vehicle speed, etc?
-	if(can_data.inverter_enable || (can_data.mc_temp_max > 400) || (can_data.motor_temp > 400)){
+	if(can_data.inverter_enable || (can_data.mc_temp_max > pump_t) || (can_data.motor_temp > pump_t)){
 		set_pump_speed(255);
+		pump_t = PUMP_THRESH;
 	} else {
 		set_pump_speed(0);
+		pump_t = PUMP_THRESH + HYSTERESIS;
 	}
 
-	if(inlet_temp > 600){
+	if(inlet_temp > fan_t3){
 		set_fan_speed(255);
-	} else if(inlet_temp > 500){
+		fan_t1 = FAN_THRESH_1;
+		fan_t2 = FAN_THRESH_2;
+		fan_t3 = FAN_THRESH_3;
+	} else if(inlet_temp > fan_t2){
 		set_fan_speed(180);
-	} else if(inlet_temp > 400){
+		fan_t1 = FAN_THRESH_1;
+		fan_t2 = FAN_THRESH_2;
+		fan_t3 = FAN_THRESH_3 + HYSTERESIS;
+	} else if(inlet_temp > fan_t1){
+		fan_t1 = FAN_THRESH_1;
+		fan_t2 = FAN_THRESH_2 + HYSTERESIS;
+		fan_t3 = FAN_THRESH_3 + HYSTERESIS;
 		set_fan_speed(100);
 	} else {
+		fan_t1 = FAN_THRESH_1 + HYSTERESIS;
+		fan_t2 = FAN_THRESH_2 + HYSTERESIS;
+		fan_t3 = FAN_THRESH_3 + HYSTERESIS;
 		set_fan_speed(0);
 	}
 
