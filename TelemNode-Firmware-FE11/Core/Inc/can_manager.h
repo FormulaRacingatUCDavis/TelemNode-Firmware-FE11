@@ -28,7 +28,8 @@ typedef enum {
     FRONT_LEFT_WHEEL_SPEED = 0x470,
     FRONT_RIGHT_WHEEL_SPEED = 0x471,
     BACK_LEFT_WHEEL_SPEED = 0x472,
-    BACK_RIGHT_WHEEL_SPEED = 0x473
+    BACK_RIGHT_WHEEL_SPEED = 0x473,
+	PUMP_PWM = 0xA51,
 } CAN_ID;
 
 typedef enum {
@@ -49,6 +50,9 @@ typedef struct {
 	int16_t mc_temp_max;
 	int16_t motor_temp;
 	uint8_t inverter_enable;
+	uint8_t PWM_requested;
+	uint8_t pumpPWM;
+	uint8_t fanPWM;
 } CAN_DATA_t;
 
 void CAN_Init();

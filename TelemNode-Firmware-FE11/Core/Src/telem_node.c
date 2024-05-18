@@ -153,6 +153,11 @@ void update_pwm(int16_t inlet_temp)
 		set_fan_speed(0);
 	}
 
+	if (can_data.PWM_requested) {
+		set_pump_speed(can_data.pumpPWM);
+		set_fan_speed(can_data.fanPWM);
+	}
+
 }
 
 int16_t get_pres(uint16_t adc_val)
