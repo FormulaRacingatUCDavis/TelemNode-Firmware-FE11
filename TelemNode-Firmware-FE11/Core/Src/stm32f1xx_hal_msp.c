@@ -104,12 +104,13 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
     PA1     ------> ADC1_IN1
+    PA2     ------> ADC1_IN2
     PA3     ------> ADC1_IN3
     PA4     ------> ADC1_IN4
     PA5     ------> ADC1_IN5
     */
-    GPIO_InitStruct.Pin = TEMP_INLET_Pin|TEMP1_Pin|TEMP3_Pin|GPIO_PIN_4
-                          |GPIO_PIN_5;
+    GPIO_InitStruct.Pin = TEMP_INLET_Pin|TEMP_AIR_IN_Pin|TEMP_OUTLET_Pin|TEMP_AIR_OUT_Pin
+                          |PRES_INLET_Pin|PRES_OUTLET_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -139,12 +140,13 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
     PA1     ------> ADC1_IN1
+    PA2     ------> ADC1_IN2
     PA3     ------> ADC1_IN3
     PA4     ------> ADC1_IN4
     PA5     ------> ADC1_IN5
     */
-    HAL_GPIO_DeInit(GPIOA, TEMP_INLET_Pin|TEMP1_Pin|TEMP3_Pin|GPIO_PIN_4
-                          |GPIO_PIN_5);
+    HAL_GPIO_DeInit(GPIOA, TEMP_INLET_Pin|TEMP_AIR_IN_Pin|TEMP_OUTLET_Pin|TEMP_AIR_OUT_Pin
+                          |PRES_INLET_Pin|PRES_OUTLET_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 

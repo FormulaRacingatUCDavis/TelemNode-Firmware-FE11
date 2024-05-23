@@ -6,6 +6,7 @@
 #include "wheel_speed.h"
 
 #define VOLTAGE_DIVIDER_RATIO (12.0 / (12.0 + 6.04))
+#define PSI_PER_KPA 0.145038
 #define HI8(x) ((x>>8)&0xFF)
 #define LO8(x) (x&0xFF);
 #define BUZZ_TIME_MS 1500
@@ -25,8 +26,11 @@ extern CAN_DATA_t can_data;
 // PRIVATE GLOBALS
 ADC_Input_t adc_inlet_temp;
 ADC_Input_t adc_outlet_temp;
-ADC_Input_t adc_temp1;
-ADC_Input_t adc_temp3;
+ADC_Input_t adc_inlet_pres;
+ADC_Input_t adc_outlet_pres;
+ADC_Input_t adc_air_in_temp;
+ADC_Input_t adc_air_out_temp;
+
 PWM_Output_t pwm_fan;
 PWM_Output_t pwm_pump;
 WheelSpeed_t wheel_rr;
@@ -34,7 +38,7 @@ WheelSpeed_t wheel_rl;
 
 
 // PRIVATE FUNCTION PROTOTYPES
-int16_t get_pres(uint16_t adc_val);
+uint16_t get_pres(uint16_t adc_val);
 int16_t get_temp(uint16_t adc_val);
 int16_t get_air_temp(uint16_t adc_val);
 void set_fan_speed(uint8_t speed);
@@ -46,11 +50,12 @@ void TelemNode_Init(){
 
 	CAN_Init();
 
-	ADC_Input_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_4, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
-	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_5, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
-
-	ADC_Input_Init(&adc_temp1, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
-	ADC_Input_Init(&adc_temp3, &hadc1, ADC_CHANNEL_3, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_inlet_pres, &hadc1, ADC_CHANNEL_4, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_outlet_pres, &hadc1, ADC_CHANNEL_5, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_inlet_temp, &hadc1, ADC_CHANNEL_0, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_2, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_air_in_temp, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_air_out_temp, &hadc1, ADC_CHANNEL_3, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 
 	PWM_Init(&pwm_fan, &htim1, TIM_CHANNEL_1);
 	PWM_Init(&pwm_pump, &htim1, TIM_CHANNEL_2);
@@ -68,29 +73,35 @@ void TelemNode_Update()
 
 	ADC_Measure(&adc_inlet_temp, 1000);
 	ADC_Measure(&adc_outlet_temp, 1000);
-
-	ADC_Measure(&adc_temp1, 1000);
-	ADC_Measure(&adc_temp3, 1000);
+	ADC_Measure(&adc_air_in_temp, 1000);
+	ADC_Measure(&adc_air_out_temp, 1000);
 
 	int16_t inlet_temp = get_temp(adc_inlet_temp.value);
 	int16_t outlet_temp = get_temp(adc_outlet_temp.value);
-
-	uint16_t temp1_raw = get_air_temp(adc_temp1.value);
-	uint16_t temp3_raw = get_air_temp(adc_temp3.value);
+	int16_t temp_air_in = get_air_temp(adc_air_in_temp.value);
+	int16_t temp_air_out = get_air_temp(adc_air_out_temp.value);
 
 	tx_data[0] = HI8(inlet_temp);
 	tx_data[1] = LO8(inlet_temp);
 	tx_data[2] = HI8(outlet_temp);
 	tx_data[3] = LO8(outlet_temp);
-	tx_data[4] = HI8(temp1_raw);
-	tx_data[5] = LO8(temp1_raw);
-	tx_data[6] = HI8(temp3_raw);
-	tx_data[7] = LO8(temp3_raw);
+	tx_data[4] = HI8(temp_air_in);
+	tx_data[5] = LO8(temp_air_in);
+	tx_data[6] = HI8(temp_air_out);
+	tx_data[7] = LO8(temp_air_out);
+	CAN_Send(0x400, tx_data, 8);
 
-	if(CAN_Send(0x400, tx_data, 8) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	ADC_Measure(&adc_inlet_pres, 1000);
+	ADC_Measure(&adc_outlet_pres, 1000);
+
+	uint16_t inlet_pres = get_pres(adc_inlet_pres.value);
+	uint16_t outlet_pres = get_pres(adc_outlet_pres.value);
+
+	tx_data[0] = HI8(inlet_pres);
+	tx_data[1] = LO8(inlet_pres);
+	tx_data[2] = HI8(outlet_pres);
+	tx_data[3] = LO8(outlet_pres);
+	CAN_Send(0x402, tx_data, 4);
 
 	for(int i = 0; i < WHEEL_SPEED_LOOPS; i++)
 	{
@@ -116,6 +127,13 @@ void TelemNode_Update()
 
 void update_pwm(int16_t inlet_temp)
 {
+	// allow manual fan and pump speed via CAN
+	if (can_data.PWM_requested) {
+		set_pump_speed(can_data.pumpPWM);
+		set_fan_speed(can_data.fanPWM);
+		return;
+	}
+
 	// threshold variables to add hysteresis
 	static int fan_t1 = FAN_THRESH_1 + HYSTERESIS;
 	static int fan_t2 = FAN_THRESH_2 + HYSTERESIS;
@@ -152,36 +170,21 @@ void update_pwm(int16_t inlet_temp)
 		fan_t3 = FAN_THRESH_3 + HYSTERESIS;
 		set_fan_speed(0);
 	}
-
-	if (can_data.PWM_requested) {
-		set_pump_speed(can_data.pumpPWM);
-		set_fan_speed(can_data.fanPWM);
-	}
-
 }
 
-int16_t get_pres(uint16_t adc_val)
+uint16_t get_pres(uint16_t adc_val)
 {
-	// TDH60W temp/pressure sensors have a FUCKING TRASH datasheet that doesn't list output curves
-	// 25psi sensors?
-	// assuming pressure range is 0-25psi, mapped to 0.5V-4.5V
-
+	// GE2098 sensor
+	// equation from datasheet
 	float v = (float)adc_val * (3.3/4095.0) / VOLTAGE_DIVIDER_RATIO;
-	float temp = (v - 0.5) * 25.0 / 4.0;
-	return (int16_t)(temp * 10);
+	float pres = (((v / 5.0) + 0.011453) / 0.0045726) * PSI_PER_KPA;
+	return (uint16_t)(pres*100);
 }
 
 int16_t get_temp(uint16_t adc_val)
 {
-	// TDH60W temp/pressure sensors have a FUCKING TRASH datasheet that doesn't list output curves
-	// only reference to temperature is 125C max
-	// assuming temperature range is 0C-125C mapped to 0.5V-4.5V
-
-	float v = (float)adc_val * (3.3/4095.0) / VOLTAGE_DIVIDER_RATIO;
-	//v = v - 0.040; // ground reference is 40m
-	//float temp = ((v - 0.5) * (120 + 40) / 4.0) - 40;
-	float temp = ((46.7558 * v) - 63.4775)/1.11248; // values from calibration run
-	return (int16_t)(temp * 10);
+	// need to recalibrate these sensors with new GE2098
+	return adc_val;
 }
 
 int16_t get_air_temp(uint16_t adc_val)
