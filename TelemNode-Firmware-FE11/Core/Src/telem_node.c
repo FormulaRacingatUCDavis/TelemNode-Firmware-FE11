@@ -70,8 +70,23 @@ void TelemNode_Init(){
 
 void TelemNode_Update()
 {
+	static uint8_t loop_count = 0;
 	static uint8_t tx_data[8];
 
+	// CODE TO RUN ONCE PER LOOP
+	ADC_Measure(&adc_strain_gauge, 1000);
+	tx_data[0] = HI8(adc_strain_gauge.value);
+	tx_data[1] = LO8(adc_strain_gauge.value);
+	CAN_Send(0x403, tx_data, 2);
+
+	buzzerer();
+	HAL_Delay(LOOP_PERIOD_MS);
+
+	loop_count++;
+	if(loop_count <= SLOW_DIVIDER) return;
+	loop_count = 0;
+
+	// CODE TO RUN AT REDUCED FREQUENCY
 	ADC_Measure(&adc_inlet_temp, 1000);
 	ADC_Measure(&adc_outlet_temp, 1000);
 	ADC_Measure(&adc_air_in_temp, 1000);
@@ -104,31 +119,7 @@ void TelemNode_Update()
 	tx_data[3] = LO8(outlet_pres);
 	CAN_Send(0x402, tx_data, 4);
 
-	for(int i = 0; i < WHEEL_SPEED_LOOPS; i++)
-	{
-		// casting to uint16_t, should never overflow
-		//uint16_t cps_rr = (uint16_t)WheelSpeed_GetCPS(&wheel_rr);
-		//uint16_t cps_rl = (uint16_t)WheelSpeed_GetCPS(&wheel_rl);
-
-		//tx_data[0] = HI8(cps_rr);
-		//tx_data[1] = LO8(cps_rr);
-		//tx_data[2] = HI8(cps_rl);
-		//tx_data[3] = LO8(cps_rl);
-
-		//if(CAN_Send(0x401, tx_data, 4) != HAL_OK)
-		//{
-		//	Error_Handler();
-		//}
-
-		ADC_Measure(&adc_strain_gauge, 1000);
-		tx_data[0] = HI8(adc_strain_gauge.value);
-		tx_data[1] = LO8(adc_strain_gauge.value);
-		CAN_Send(0x403, tx_data, 2);
-
-		buzzerer();
-		update_pwm(inlet_temp);
-		HAL_Delay(LOOP_PERIOD_MS);
-	}
+	update_pwm(inlet_temp);
 }
 
 void update_pwm(int16_t inlet_temp)
