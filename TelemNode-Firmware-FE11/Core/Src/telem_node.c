@@ -30,6 +30,7 @@ ADC_Input_t adc_inlet_pres;
 ADC_Input_t adc_outlet_pres;
 ADC_Input_t adc_air_in_temp;
 ADC_Input_t adc_air_out_temp;
+ADC_Input_t adc_strain_gauge;
 
 PWM_Output_t pwm_fan;
 PWM_Output_t pwm_pump;
@@ -47,7 +48,6 @@ void update_pwm(int16_t inlet_temp);
 void buzzerer();
 
 void TelemNode_Init(){
-
 	CAN_Init();
 
 	ADC_Input_Init(&adc_inlet_pres, &hadc1, ADC_CHANNEL_4, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
@@ -56,6 +56,7 @@ void TelemNode_Init(){
 	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_2, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 	ADC_Input_Init(&adc_air_in_temp, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 	ADC_Input_Init(&adc_air_out_temp, &hadc1, ADC_CHANNEL_3, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_strain_gauge, &hadc1, ADC_CHANNEL_6, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 
 	PWM_Init(&pwm_fan, &htim1, TIM_CHANNEL_1);
 	PWM_Init(&pwm_pump, &htim1, TIM_CHANNEL_2);
@@ -106,18 +107,23 @@ void TelemNode_Update()
 	for(int i = 0; i < WHEEL_SPEED_LOOPS; i++)
 	{
 		// casting to uint16_t, should never overflow
-		uint16_t cps_rr = (uint16_t)WheelSpeed_GetCPS(&wheel_rr);
-		uint16_t cps_rl = (uint16_t)WheelSpeed_GetCPS(&wheel_rl);
+		//uint16_t cps_rr = (uint16_t)WheelSpeed_GetCPS(&wheel_rr);
+		//uint16_t cps_rl = (uint16_t)WheelSpeed_GetCPS(&wheel_rl);
 
-		tx_data[0] = HI8(cps_rr);
-		tx_data[1] = LO8(cps_rr);
-		tx_data[2] = HI8(cps_rl);
-		tx_data[3] = LO8(cps_rl);
+		//tx_data[0] = HI8(cps_rr);
+		//tx_data[1] = LO8(cps_rr);
+		//tx_data[2] = HI8(cps_rl);
+		//tx_data[3] = LO8(cps_rl);
 
-		if(CAN_Send(0x401, tx_data, 4) != HAL_OK)
-		{
-			Error_Handler();
-		}
+		//if(CAN_Send(0x401, tx_data, 4) != HAL_OK)
+		//{
+		//	Error_Handler();
+		//}
+
+		ADC_Measure(&adc_strain_gauge, 1000);
+		tx_data[0] = HI8(adc_strain_gauge.value);
+		tx_data[1] = LO8(adc_strain_gauge.value);
+		CAN_Send(0x403, tx_data, 2);
 
 		buzzerer();
 		update_pwm(inlet_temp);
