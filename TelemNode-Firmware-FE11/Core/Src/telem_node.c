@@ -4,6 +4,7 @@
 #include "can_manager.h"
 #include "main.h"
 #include "wheel_speed.h"
+#include "math.h"
 
 #define VOLTAGE_DIVIDER_RATIO (12.0 / (12.0 + 6.04))
 #define PSI_PER_KPA 0.145038
@@ -180,8 +181,9 @@ uint16_t get_pres(uint16_t adc_val)
 
 int16_t get_temp(uint16_t adc_val)
 {
-	// need to recalibrate these sensors with new GE2098
-	return adc_val;
+	// need to recalibrate these sensors with new GE2098(Already calibrated)
+	float temp = (99.2596*exp((-3.22926) * adc_val / 4095) - 21.4981-3.17)/1.01085;
+	return (int16_t) (temp*10);
 }
 
 int16_t get_air_temp(uint16_t adc_val)
