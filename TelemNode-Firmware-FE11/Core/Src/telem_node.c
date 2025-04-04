@@ -31,7 +31,10 @@ ADC_Input_t adc_inlet_pres;
 ADC_Input_t adc_outlet_pres;
 ADC_Input_t adc_air_in_temp;
 ADC_Input_t adc_air_out_temp;
-ADC_Input_t adc_strain_gauge;
+ADC_Input_t adc_toe_strain_gauge;
+ADC_Input_t adc_a_arm_strain_gauge;
+ADC_Input_t adc_extra_3;
+ADC_Input_t adc_extra_4;
 
 PWM_Output_t pwm_fan;
 PWM_Output_t pwm_pump;
@@ -46,7 +49,7 @@ int16_t get_air_temp(uint16_t adc_val);
 void set_fan_speed(uint8_t speed);
 void set_pump_speed(uint8_t speed);
 void update_pwm(int16_t inlet_temp);
-void buzzerer();
+// void buzzerer();
 
 void TelemNode_Init(){
 	CAN_Init();
@@ -57,7 +60,10 @@ void TelemNode_Init(){
 	ADC_Input_Init(&adc_outlet_temp, &hadc1, ADC_CHANNEL_2, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 	ADC_Input_Init(&adc_air_in_temp, &hadc1, ADC_CHANNEL_1, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 	ADC_Input_Init(&adc_air_out_temp, &hadc1, ADC_CHANNEL_3, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
-	ADC_Input_Init(&adc_strain_gauge, &hadc1, ADC_CHANNEL_6, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_toe_strain_gauge, &hadc1, ADC_CHANNEL_6, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_a_arm_strain_gauge, &hadc1, ADC_CHANNEL_7, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_extra_3, &hadc1, ADC_CHANNEL_8, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
+	ADC_Input_Init(&adc_extra_4, &hadc1, ADC_CHANNEL_9, ADC_REGULAR_RANK_1, ADC_SAMPLETIME_239CYCLES_5);
 
 	PWM_Init(&pwm_fan, &htim1, TIM_CHANNEL_1);
 	PWM_Init(&pwm_pump, &htim1, TIM_CHANNEL_2);
@@ -75,13 +81,22 @@ void TelemNode_Update()
 	static uint8_t tx_data[8];
 
 	// CODE TO RUN ONCE PER LOOP
-	ADC_Measure(&adc_strain_gauge, 1000);
-	tx_data[0] = HI8(adc_strain_gauge.value);
-	tx_data[1] = LO8(adc_strain_gauge.value);
-	CAN_Send(0x403, tx_data, 2);
+	ADC_Measure(&adc_toe_strain_gauge, 1000);
+	tx_data[0] = HI8(adc_toe_strain_gauge.value);
+	tx_data[1] = LO8(adc_toe_strain_gauge.value);
+	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
+	tx_data[2] = HI8(adc_a_arm_strain_gauge.value);
+	tx_data[3] = LO8(adc_a_arm_strain_gauge.value);
+	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
+	tx_data[4] = HI8(adc_extra_3.value);
+	tx_data[5] = LO8(adc_extra_3.value);
+	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
+	tx_data[6] = HI8(adc_extra_4.value);
+	tx_data[7] = LO8(adc_extra_4.value);
+	CAN_Send(0x403, tx_data, 8);
 
-	buzzerer();
-	HAL_Delay(LOOP_PERIOD_MS);
+//	buzzerer();
+//	HAL_Delay(LOOP_PERIOD_MS);
 
 	loop_count++;
 	if(loop_count <= SLOW_DIVIDER) return;
@@ -203,35 +218,35 @@ void set_fan_speed(uint8_t speed)
 	PWM_SetDutyCycle(&pwm_fan, 255-speed);
 }
 
-void buzzerer()
-{
-	static VCU_STATE_t last_vcu_state = LV;
-	static uint32_t buzz_start = 0;
-	uint32_t tick = HAL_GetTick();
-
-	if(last_vcu_state == HV_ENABLED && can_data.vcu_state == DRIVE)
-	{
-		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1); // turn on buzzer
-		buzz_start = tick;
-	}
-	else if(can_data.vcu_state != DRIVE || (tick - buzz_start) > BUZZ_TIME_MS)
-	{
-		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0); // turn off buzzer
-	}
-	else
-	{
-		// ice cream?
-	}
-
-	last_vcu_state = can_data.vcu_state;
-}
+//void buzzerer()
+//{
+//	static VCU_STATE_t last_vcu_state = LV;
+//	static uint32_t buzz_start = 0;
+//	uint32_t tick = HAL_GetTick();
+//
+//	if(last_vcu_state == HV_ENABLED && can_data.vcu_state == DRIVE)
+//	{
+//		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1); // turn on buzzer
+//		buzz_start = tick;
+//	}
+//	else if(can_data.vcu_state != DRIVE || (tick - buzz_start) > BUZZ_TIME_MS)
+//	{
+//		HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0); // turn off buzzer
+//	}
+//	else
+//	{
+//		// ice cream?
+//	}
+//
+//	last_vcu_state = can_data.vcu_state;
+//}
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	switch(GPIO_Pin){
-		case GPIO_PIN_15:
+		case GPIO_PIN_4:
 			wheel_rr.count++;
 			break;
-		case GPIO_PIN_8:
+		case GPIO_PIN_6:
 			wheel_rl.count++;
 			break;
 	}

@@ -71,12 +71,17 @@ void Error_Handler(void);
 #define PRES_INLET_GPIO_Port GPIOA
 #define PRES_OUTLET_Pin GPIO_PIN_5
 #define PRES_OUTLET_GPIO_Port GPIOA
-#define BUZZER_Pin GPIO_PIN_12
-#define BUZZER_GPIO_Port GPIOB
-#define PWM_FAN_Pin GPIO_PIN_13
-#define PWM_FAN_GPIO_Port GPIOB
-#define PWM_PUMP_Pin GPIO_PIN_14
-#define PWM_PUMP_GPIO_Port GPIOB
+#define TOE_STRAIN_GAUGE_Pin GPIO_PIN_6
+#define TOE_STRAIN_GAUGE_GPIO_Port GPIOA
+#define AARM_STRAIN_GAUGE_Pin GPIO_PIN_7
+#define AARM_STRAIN_GAUGE_GPIO_Port GPIOA
+#define PWM_PUMP_Pin GPIO_PIN_9
+#define PWM_PUMP_GPIO_Port GPIOA
+#define WHEEL_1_Pin GPIO_PIN_4
+#define WHEEL_1_GPIO_Port GPIOB
+#define WHEEL_0_Pin GPIO_PIN_6
+#define WHEEL_0_GPIO_Port GPIOB
+#define WHEEL_0_EXTI_IRQn EXTI9_5_IRQn
 
 /* USER CODE BEGIN Private defines */
 
