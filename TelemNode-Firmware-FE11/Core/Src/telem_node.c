@@ -210,12 +210,12 @@ int16_t get_air_temp(uint16_t adc_val)
 
 void set_pump_speed(uint8_t speed)
 {
-	PWM_SetDutyCycle(&pwm_pump, 255-speed);
+	PWM_SetDutyCycle(&pwm_pump, speed);
 }
 
 void set_fan_speed(uint8_t speed)
 {
-	PWM_SetDutyCycle(&pwm_fan, 255-speed);
+	PWM_SetDutyCycle(&pwm_fan, speed);
 }
 
 //void buzzerer()
