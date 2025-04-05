@@ -12,7 +12,7 @@ HAL_StatusTypeDef PWM_Init(PWM_Output_t* pwm, TIM_HandleTypeDef* h_tim, uint32_t
 	pwm->h_tim = h_tim;
 	pwm->channel = channel;
 
-	return HAL_TIMEx_PWMN_Start(h_tim, channel);
+	return HAL_TIM_PWM_Start(h_tim, channel);
 }
 
 void PWM_SetDutyCycle(PWM_Output_t* pwm, uint8_t duty)
