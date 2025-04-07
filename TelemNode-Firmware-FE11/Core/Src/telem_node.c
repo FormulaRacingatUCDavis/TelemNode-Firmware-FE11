@@ -80,21 +80,6 @@ void TelemNode_Update()
 	static uint8_t loop_count = 0;
 	static uint8_t tx_data[8];
 
-	// CODE TO RUN ONCE PER LOOP
-	ADC_Measure(&adc_toe_strain_gauge, 1000);
-	tx_data[0] = HI8(adc_toe_strain_gauge.value);
-	tx_data[1] = LO8(adc_toe_strain_gauge.value);
-	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
-	tx_data[2] = HI8(adc_a_arm_strain_gauge.value);
-	tx_data[3] = LO8(adc_a_arm_strain_gauge.value);
-	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
-	tx_data[4] = HI8(adc_extra_3.value);
-	tx_data[5] = LO8(adc_extra_3.value);
-	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
-	tx_data[6] = HI8(adc_extra_4.value);
-	tx_data[7] = LO8(adc_extra_4.value);
-	CAN_Send(0x403, tx_data, 8);
-
 //	buzzerer();
 //	HAL_Delay(LOOP_PERIOD_MS);
 
@@ -102,7 +87,8 @@ void TelemNode_Update()
 	if(loop_count <= SLOW_DIVIDER) return;
 	loop_count = 0;
 
-	// CODE TO RUN AT REDUCED FREQUENCY
+	// NOTE: can send temps and pressures at reduced frequency if CAN traffic too high
+
 	ADC_Measure(&adc_inlet_temp, 1000);
 	ADC_Measure(&adc_outlet_temp, 1000);
 	ADC_Measure(&adc_air_in_temp, 1000);
@@ -121,7 +107,7 @@ void TelemNode_Update()
 	tx_data[5] = LO8(temp_air_in);
 	tx_data[6] = HI8(temp_air_out);
 	tx_data[7] = LO8(temp_air_out);
-	CAN_Send(0x400, tx_data, 8);
+	CAN_Send(COOLING_LOOP_TEMPS, tx_data, 8);
 
 	ADC_Measure(&adc_inlet_pres, 1000);
 	ADC_Measure(&adc_outlet_pres, 1000);
@@ -133,7 +119,30 @@ void TelemNode_Update()
 	tx_data[1] = LO8(inlet_pres);
 	tx_data[2] = HI8(outlet_pres);
 	tx_data[3] = LO8(outlet_pres);
-	CAN_Send(0x402, tx_data, 4);
+	CAN_Send(COOLING_LOOP_PRESSURES, tx_data, 4);
+
+	uint32_t wheel_speed_rr = WheelSpeed_GetCPS(&wheel_rr);
+	uint32_t wheel_speed_rl = WheelSpeed_GetCPS(&wheel_rl);
+	tx_data[0] = HI8(wheel_speed_rr);
+	tx_data[1] = LO8(wheel_speed_rr);
+	tx_data[2] = HI8(wheel_speed_rl);
+	tx_data[3] = LO8(wheel_speed_rl);
+	CAN_Send(WHEEL_SPEED_REAR, tx_data, 4); // only sending the lower 16 bytes of each speed
+
+	// TODO: finish when strain gauges are installed
+//	ADC_Measure(&adc_toe_strain_gauge, 1000);
+//	tx_data[0] = HI8(adc_toe_strain_gauge.value);
+//	tx_data[1] = LO8(adc_toe_strain_gauge.value);
+//	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
+//	tx_data[2] = HI8(adc_a_arm_strain_gauge.value);
+//	tx_data[3] = LO8(adc_a_arm_strain_gauge.value);
+//	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
+//	tx_data[4] = HI8(adc_extra_3.value);
+//	tx_data[5] = LO8(adc_extra_3.value);
+//	ADC_Measure(&adc_a_arm_strain_gauge, 1000);
+//	tx_data[6] = HI8(adc_extra_4.value);
+//	tx_data[7] = LO8(adc_extra_4.value);
+//	CAN_Send(STRAIN_GAUGE_REAR, tx_data, 8);
 
 	update_pwm(inlet_temp);
 }
