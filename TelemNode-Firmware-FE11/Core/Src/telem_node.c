@@ -151,8 +151,8 @@ void update_pwm(int16_t inlet_temp)
 {
 	// allow manual fan and pump speed via CAN
 	if (can_data.PWM_requested) {
-		set_pump_speed(can_data.pumpPWM);
-		set_fan_speed(can_data.fanPWM);
+		set_pump_speed(100); //TODO find good hardcoded value // orig used can_data.pumpPWM but not necessary
+		set_fan_speed(100);  //TODO find good hardcoded value // orig used can_data.fanPWM but not necessary
 		return;
 	}
 

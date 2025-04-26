@@ -93,9 +93,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan_ptr)
 			can_data.inverter_enable = can_rx_data[5] & 0x01;
 			break;
 		case PUMP_PWM:
-			can_data.PWM_requested = 1;
-			can_data.pumpPWM = can_rx_data[0];
-			can_data.fanPWM = can_rx_data[1];
+			// 1 means override to use hardcoded value, 0 means we can use our own algoritm for PWM values
+			if (can_rx_data[0] == 1) {
+				can_data.PWM_requested = 1;
+			} else {
+				can_data.PWM_requested = 0;
+			}
 			break;
 	}
 }
