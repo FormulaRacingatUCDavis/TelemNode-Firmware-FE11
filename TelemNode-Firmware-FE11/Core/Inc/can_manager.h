@@ -28,7 +28,7 @@ typedef enum {
     WHEEL_SPEED_REAR = 0x401,
 	COOLING_LOOP_PRESSURES = 0x402,
 	STRAIN_GAUGES_REAR = 0x403,
-	PUMP_PWM = 0xA51,
+	PUMP_PWM = 0x505,
 } CAN_ID;
 
 typedef enum {
