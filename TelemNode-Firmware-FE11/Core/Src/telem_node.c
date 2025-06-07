@@ -149,12 +149,14 @@ void TelemNode_Update()
 
 void update_pwm(int16_t inlet_temp)
 {
+	set_pump_speed(40);
+
 	// allow manual fan and pump speed via CAN
-	if (can_data.PWM_requested) {
-		set_pump_speed(100); //TODO find good hardcoded value // orig used can_data.pumpPWM but not necessary
-		set_fan_speed(100);  //TODO find good hardcoded value // orig used can_data.fanPWM but not necessary
-		return;
-	}
+//	if (can_data.PWM_requested) {
+//		set_pump_speed(can_data.pumpPWM);
+//		set_fan_speed(can_data.fanPWM);
+//		return;
+//	}
 
 	// threshold variables to add hysteresis
 	static int fan_t1 = FAN_THRESH_1 + HYSTERESIS;
@@ -163,13 +165,13 @@ void update_pwm(int16_t inlet_temp)
 	static int pump_t = PUMP_THRESH + HYSTERESIS;
 
 	//TODO: update these values to consider ambient air temp, vehicle speed, etc?
-	if(can_data.inverter_enable || (can_data.mc_temp_max > pump_t) || (can_data.motor_temp > pump_t)){
-		set_pump_speed(255);
-		pump_t = PUMP_THRESH;
-	} else {
-		set_pump_speed(0);
-		pump_t = PUMP_THRESH + HYSTERESIS;
-	}
+//	if(can_data.inverter_enable || (can_data.mc_temp_max > pump_t) || (can_data.motor_temp > pump_t)){
+//		set_pump_speed(255);
+//		pump_t = PUMP_THRESH;
+//	} else {
+//		set_pump_speed(0);
+//		pump_t = PUMP_THRESH + HYSTERESIS;
+//	}
 
 	if(inlet_temp > fan_t3){
 		set_fan_speed(255);
