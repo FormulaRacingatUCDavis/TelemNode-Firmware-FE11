@@ -149,7 +149,7 @@ void TelemNode_Update()
 
 void update_pwm(int16_t inlet_temp)
 {
-	set_pump_speed(40);
+	//set_pump_speed(40);
 
 	// allow manual fan and pump speed via CAN
 //	if (can_data.PWM_requested) {
