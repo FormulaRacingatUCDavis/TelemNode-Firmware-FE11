@@ -77,6 +77,8 @@ void Error_Handler(void);
 #define AARM_STRAIN_GAUGE_GPIO_Port GPIOA
 #define PWM_PUMP_Pin GPIO_PIN_9
 #define PWM_PUMP_GPIO_Port GPIOA
+#define BUZZER_Pin GPIO_PIN_10
+#define BUZZER_GPIO_Port GPIOA
 #define WHEEL_1_Pin GPIO_PIN_4
 #define WHEEL_1_GPIO_Port GPIOB
 #define WHEEL_0_Pin GPIO_PIN_6
