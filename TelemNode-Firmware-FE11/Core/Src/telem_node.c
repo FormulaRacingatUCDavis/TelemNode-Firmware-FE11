@@ -72,7 +72,7 @@ void TelemNode_Init(){
 	WheelSpeed_Init(&wheel_rl);
 
 	set_pump_speed(255);
-	set_fan_speed(0);
+	set_fan_speed(128);
 }
 
 void TelemNode_Update()
@@ -144,7 +144,7 @@ void TelemNode_Update()
 //	tx_data[7] = LO8(adc_extra_4.value);
 //	CAN_Send(STRAIN_GAUGE_REAR, tx_data, 8);
 
-	update_pwm(inlet_temp);
+	//update_pwm(inlet_temp);
 }
 
 void update_pwm(int16_t inlet_temp)

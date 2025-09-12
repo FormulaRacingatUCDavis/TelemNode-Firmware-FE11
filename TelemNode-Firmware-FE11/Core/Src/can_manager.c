@@ -62,7 +62,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan_ptr)
 	switch(can_rx_header.StdId)
 	{
 		case VEHICLE_STATE:
-			can_data.vcu_state = can_rx_data[5];
+			can_data.vcu_state = can_rx_data[4];
 			break;
 		case BMS_STATUS_MSG:
 			can_data.bms_temp = can_rx_data[0];
